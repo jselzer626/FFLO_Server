@@ -2,29 +2,42 @@ import json
 from selenium import webdriver
 from bs4 import BeautifulSoup
 import requests
+from random import randint
+from time import sleep
 
+#goal is to update db with info including player image url for each player
 
 fb_base_url = 'https://www.nfl.com/players/'
 
 
 data = requests.get('https://www.fantasyfootballnerd.com/service/players/json/8qb63ck2ibj4/')
 dataJson = data.json()
-players = dataJson["Players"]
-duplicate_names = []
-for i in range(1, len(players)):
-    if players[i-1]['displayName'] == players[i]['displayName']:
-        duplicate_names.append(players[i-1])
-        duplicate_names.append(players[i])
+players = json.dumps(dataJson["Players"])
+error_url = 'https://static.www.nfl.com/image/private/t_player_profile_landscape/f_auto/league/fxv8ozrp13i9st1qwok9'
+print(len(players))
 
-print(duplicate_names)
+f = open("playerData.json", 'w')
+for player in players:
+    f.write(player)
+f.close()
 
-'''testPlayer = players[0]['displayName']
-testPlayerSearchable = testPlayer.replace(" ", "-")'''
+'''testPlayerSet = [{'displayName': player['displayName']} for player in players[:5]]
+# testPlayerSearchable = testPlayer.replace(" ", "-")
 
 
-'''driver = webdriver.Chrome(executable_path=r'C:/webdrivers/chromedriver.exe')
-driver.get(f"{fb_base_url}/{testPlayerSearchable}")
-content = driver.page_source
-soup=BeautifulSoup(content)
-tag = soup.find('img', attrs={'alt': testPlayer, 'class': 'img-responsive'})
-print(tag.attrs['src'])'''
+for player in testPlayerSet:
+    searchableName = player['displayName'].replace(" ", "-")
+    driver = webdriver.Chrome(executable_path=r'C:/webdrivers/chromedriver.exe')
+    driver.get(f"{fb_base_url}/{searchableName}")
+    sleep(randint(10,20))
+    content = driver.page_source
+    soup=BeautifulSoup(content)
+    try:
+        tag = soup.find('img', attrs={'alt': player['displayName'], 'class': 'img-responsive'})
+        src = tag.attrs['src']
+    except Exception:
+        src = error_url
+    driver.close()
+    player.update({'ranking': 999, 'imageUrl': src})
+    
+print(testPlayerSet)'''
