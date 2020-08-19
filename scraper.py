@@ -5,20 +5,38 @@ import requests
 from random import randint
 from time import sleep
 
+
 #goal is to update db with info including player image url for each player
 
 fb_base_url = 'https://www.nfl.com/players/'
 
-
-data = requests.get('https://www.fantasyfootballnerd.com/service/players/json/8qb63ck2ibj4/')
+positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF']
+'''data = requests.get('https://www.fantasyfootballnerd.com/service/players/json/8qb63ck2ibj4/')
 dataJson = data.json()
 players = json.dumps(dataJson["Players"])
 error_url = 'https://static.www.nfl.com/image/private/t_player_profile_landscape/f_auto/league/fxv8ozrp13i9st1qwok9'
-print(len(players))
+print(len(players))'''
 
 f = open("playerData.json", 'w')
-for player in players:
-    f.write(player)
+rankingsDict = {}
+for position in positions:
+    standardData = requests.get(f"https://www.fantasyfootballnerd.com/service/weekly-rankings/json/8qb63ck2ibj4/{position}/1")
+    pprData = requests.get(f"https://www.fantasyfootballnerd.com/service/weekly-rankings/json/8qb63ck2ibj4/{position}/1/1")
+    standardDataJson = standardData.json()
+    pprDataJson = pprData.json()
+    standardRankings = json.dumps(standardDataJson)
+    pprRankings = json.dumps(pprDataJson)
+    for rank, ranking in enumerate(standardRankings):
+        rankingsDict.update({ranking.playerId: [{standardRanking: rank}]})
+    for rank, ranking in enumerate(pprRankings):
+        if rankingsDict[ranking.playerId]:
+            rankingsDict[ranking.playerId].append({pprRanking: rank})
+        else:
+            rankingsDict.update({ranking.playerId: [pprRanking: rank]})
+
+f.write(rankingsDict)
+    
+
 f.close()
 
 '''testPlayerSet = [{'displayName': player['displayName']} for player in players[:5]]

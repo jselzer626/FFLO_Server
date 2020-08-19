@@ -14,8 +14,10 @@ class Player(models.Model):
     position=models.CharField(max_length=3)
     team=models.CharField(max_length=3)
     roster=models.ManyToManyField(Roster, blank=True)
-    ranking=models.IntegerField(default=999)
-    profileImg=models.CharField(max_length=100)
+    pprRanking=models.IntegerField(default=999)
+    standardRanking=models.IntegerField(default=999)
+    profileImg=models.CharField(max_length=150)
+    playerId=models.IntegerField(default=999)
 
     def __str__(self):
         return f"{self.displayName} {self.position} {self.team}"
