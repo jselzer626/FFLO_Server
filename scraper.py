@@ -17,6 +17,7 @@ players = json.dumps(dataJson["Players"])
 error_url = 'https://static.www.nfl.com/image/private/t_player_profile_landscape/f_auto/league/fxv8ozrp13i9st1qwok9'
 print(len(players))'''
 
+#need to have this start rankings from one and not zero
 f = open("playerData.json", 'w')
 rankingsDict = {}
 for position in positions:
@@ -24,17 +25,17 @@ for position in positions:
     pprData = requests.get(f"https://www.fantasyfootballnerd.com/service/weekly-rankings/json/8qb63ck2ibj4/{position}/1/1")
     standardDataJson = standardData.json()
     pprDataJson = pprData.json()
-    standardRankings = json.dumps(standardDataJson)
-    pprRankings = json.dumps(pprDataJson)
+    standardRankings = standardDataJson['Rankings']
+    pprRankings = pprDataJson['Rankings']
     for rank, ranking in enumerate(standardRankings):
-        rankingsDict.update({ranking.playerId: [{standardRanking: rank}]})
+        rankingsDict.update({ranking['playerId']: [{'standardRanking': rank+1}]})
     for rank, ranking in enumerate(pprRankings):
-        if rankingsDict[ranking.playerId]:
-            rankingsDict[ranking.playerId].append({pprRanking: rank})
+        if rankingsDict[ranking['playerId']]:
+            rankingsDict[ranking['playerId']].append({'pprRanking': rank+1})
         else:
-            rankingsDict.update({ranking.playerId: [pprRanking: rank]})
+            rankingsDict.update({ranking.playerId: [{'pprRanking': rank+1}]})
 
-f.write(rankingsDict)
+f.write(json.dumps(rankingsDict))
     
 
 f.close()
