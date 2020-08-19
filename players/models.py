@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from rest_framework import serializers
 
 # Create your models here.
 class Roster(models.Model):
@@ -22,8 +21,3 @@ class Player(models.Model):
 
     def __str__(self):
         return f"{self.displayName} {self.position} {self.team}"
-
-class PlayerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Player
-        fields = ['displayName', 'team']
