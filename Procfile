@@ -1,0 +1,1 @@
+web: gunicorn FFLO_Server_Django.wsgi
