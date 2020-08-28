@@ -6,7 +6,7 @@ from .models import Player, Roster
 def loadInitial(request):
     fullPlayerSet = [
         {'id': player.playerId, 'displayName': player.displayName, 'team': player.team, 'position': player.position,
-        'profileImg': player.profileImg}
+        'profileImg': player.profileImg, 'standardRanking': player.standardRanking, "pprRanking": player.pprRanking}
         for player in Player.objects.all()]
     
     response = JsonResponse(fullPlayerSet, safe=False)

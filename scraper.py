@@ -45,14 +45,14 @@ f.close()
 
 
 for player in testPlayerSet:
-    searchableName = player['displayName'].replace(" ", "-")
+    searchableName = player.displayName.replace(" ", "-")
     driver = webdriver.Chrome(executable_path=r'C:/webdrivers/chromedriver.exe')
     driver.get(f"{fb_base_url}/{searchableName}")
     sleep(randint(10,20))
     content = driver.page_source
     soup=BeautifulSoup(content)
     try:
-        tag = soup.find('img', attrs={'alt': player['displayName'], 'class': 'img-responsive'})
+        tag = soup.find('img', attrs={'alt': player.displayName, 'class': 'img-responsive'})
         src = tag.attrs['src']
     except Exception:
         src = error_url
