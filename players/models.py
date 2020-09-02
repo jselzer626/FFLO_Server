@@ -2,10 +2,13 @@ from django.db import models
 from django.conf import settings
 
 # Create your models here.
+class Owner(models.Model):
+    number=models.CharField(max_length=10)
+    verify=models.CharField(max_length=7)
+
 class Roster(models.Model):
     name=models.CharField(max_length=30)
-    user=models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-
+    user=models.ForeignKey(Owner, on_delete=models.CASCADE)
 
 class Player(models.Model):
     fname=models.CharField(max_length=20)
