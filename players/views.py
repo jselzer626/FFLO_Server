@@ -1,3 +1,4 @@
+import os
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import Player, Roster, Owner
@@ -21,26 +22,26 @@ def loadInitial(request):
     return response
 
 
-def GenerateCode(request):
+def generateCode(request):
 
     destinationNumber = request.POST['number']
     # this is a token sent to the user to configure message receipt
     code = randint(100000, 999999)
-    newNumber = Owner(number=desintationNumber, verify=code)
+    newNumber = Owner(number=destinationNumber, verify=code)
     newNumber.save()
 
     #send message
     messageSuccess = True
     try:
         numberVerification = client.messages.create(
-            body=f"Your code for Lineup Reminder is {code}"
-            from_=origin_number
+            body=f"Your code for Lineup Reminder is {code}",
+            from_=origin_number,
             to=f"+1{destinationNumber}"
         )
     except Exception:
         messageSuccess = False
 
-    response=JsonResponse(messageSuccess)
+    response = JsonResponse(messageSuccess, safe=False)
     response["Access-Control-Allow-Origin"] = '*'
     return response
 
@@ -49,7 +50,7 @@ def verifyCode(request):
     code = request.POST['code']
     verifySuccess = True
     try:
-        number = Owner.objects.get(verify=code)
+        Owner.objects.get(verify=code)
     except Exception:
         verifySuccess = False
     
