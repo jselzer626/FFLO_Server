@@ -56,12 +56,12 @@ def verifyCode(request):
     number = request.POST['number']
     responseText = ''
     try:
-        if Owner.objects.get(verify=code) != Owner.objects.get(number=number):
+        if Owner.objects.get(verify=code) == Owner.objects.get(number=number):
             responseText = "verified"
     except Exception:
         responseText = "error"
     
-    response=JsonResponse(verifySuccess)
+    response=JsonResponse(responseText, safe=False)
     response["Access-Control-Allow-Origin"] = '*'
     return response
     
