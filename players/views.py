@@ -25,37 +25,43 @@ def loadInitial(request):
 def generateCode(request):
 
     destinationNumber = request.POST['number']
-    # this is a token sent to the user to configure message receipt
-    code = randint(100000, 999999)
-    newNumber = Owner(number=destinationNumber, verify=code)
-    newNumber.save()
-
-    #send message
-    messageSuccess = True
+    # check if number has already been verified
+    responseText = ''
     try:
-        numberVerification = client.messages.create(
-            body=f"Your code for Lineup Reminder is {code}",
-            from_=origin_number,
-            to=f"+1{destinationNumber}"
-        )
+        Owner.objects.get(number=destinationNumber)
+        responseText="verified"
     except Exception:
-        messageSuccess = False
+        # this is a token sent to the user to configure message receipt
+        code = randint(100000, 999999)
+        newNumber = Owner(number=destinationNumber, verify=code)
+        newNumber.save()
 
-    response = JsonResponse(messageSuccess, safe=False)
+        responseText = "send success"
+        try:
+            numberVerification = client.messages.create(
+                body=f"Your code for Lineup Reminder is {code}",
+                from_=origin_number,
+                to=f"+1{destinationNumber}"
+            )
+        except Exception:
+            responseText = "error"
+
+    response = JsonResponse(responseText, safe=False)
     response["Access-Control-Allow-Origin"] = '*'
     return response
 
 def verifyCode(request):
 
     code = request.POST['code']
-    verifySuccess = True
+    number = request.POST['number']
+    responseText = ''
     try:
-        Owner.objects.get(verify=code)
+        if Owner.objects.get(verify=code) != Owner.objects.get(number=number):
+            responseText = "verified"
     except Exception:
-        verifySuccess = False
+        responseText = "error"
     
     response=JsonResponse(verifySuccess)
     response["Access-Control-Allow-Origin"] = '*'
     return response
     
-
