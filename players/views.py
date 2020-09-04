@@ -1,4 +1,5 @@
 import os
+import json
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import Player, Roster, Owner
@@ -55,13 +56,27 @@ def verifyCode(request):
     code = request.POST['code']
     number = request.POST['number']
     roster = request.POST['roster']
+    parameters = request.POST['parameters']
     responseText = ''
     try:
         owner = Owner.objects.get(number=number)
-        if owner == Owner.objects.get(verify=verify):
-            rosterToAdd = json.loads(roster)
+        if owner == Owner.objects.get(verify=code):
+            print('yes1')
+            playersToAdd = json.loads(roster)
+            print(playersToAdd['name'])
+            if Roster.objects.filter(name=playersToAdd['name'],owner=owner):
+                print('yes2')
+                raise Exception
+            newRoster = Roster(owner=owner, name=playersToAdd['name'], parameters=parameters)
+            newRoster.save()
+            for player in playersToAdd['Total']:
+                playerDB = Player.objects.get(playerId = player['id'])
+                print(playerDB)
+                newRoster.players.add(playerDB)
+
+            responseText='verified'
+
             
-            responseText = "verified"
     except Exception:
         responseText = "error"
     
