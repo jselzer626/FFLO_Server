@@ -24,9 +24,11 @@ class Player(models.Model):
         return f"{self.displayName} {self.position} {self.team}"
 
 class Roster(models.Model):
+    id=models.AutoField(primary_key=True)
     name=models.CharField(max_length=30)
     owner=models.ForeignKey(Owner, on_delete=models.CASCADE)
     players=models.ManyToManyField(Player, blank=True)
+    parameters=models.CharField(max_length=200, blank=True)
 
     def __str__(self):
         return f"{self.owner} - {self.name}"
