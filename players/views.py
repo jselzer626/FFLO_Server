@@ -25,6 +25,7 @@ def loadInitial(request):
 def generateCode(request):
 
     destinationNumber = request.POST['number']
+    roster = request.POST['roster']
     # check if number has already been verified
     responseText = ''
     try:
@@ -54,9 +55,11 @@ def verifyCode(request):
 
     code = request.POST['code']
     number = request.POST['number']
+    roster = request.POST['roster']
     responseText = ''
     try:
         if Owner.objects.get(verify=code) == Owner.objects.get(number=number):
+
             responseText = "verified"
     except Exception:
         responseText = "error"

@@ -6,9 +6,8 @@ class Owner(models.Model):
     number=models.CharField(max_length=10)
     verify=models.CharField(max_length=7)
 
-class Roster(models.Model):
-    name=models.CharField(max_length=30)
-    user=models.ForeignKey(Owner, on_delete=models.CASCADE)
+    def __str__(self):
+        return f"{self.number}"
 
 class Player(models.Model):
     fname=models.CharField(max_length=20)
@@ -16,7 +15,6 @@ class Player(models.Model):
     displayName=models.CharField(max_length=40)
     position=models.CharField(max_length=3)
     team=models.CharField(max_length=3)
-    roster=models.ManyToManyField(Roster, blank=True)
     pprRanking=models.IntegerField(default=999)
     standardRanking=models.IntegerField(default=999)
     profileImg=models.CharField(max_length=150)
@@ -24,3 +22,11 @@ class Player(models.Model):
 
     def __str__(self):
         return f"{self.displayName} {self.position} {self.team}"
+
+class Roster(models.Model):
+    name=models.CharField(max_length=30)
+    owner=models.ForeignKey(Owner, on_delete=models.CASCADE)
+    players=models.ManyToManyField(Player, blank=True)
+
+    def __str__(self):
+        return f"{self.owner} - {self.name}"
