@@ -83,4 +83,17 @@ def verifyCode(request):
     response=JsonResponse(responseText, safe=False)
     response["Access-Control-Allow-Origin"] = '*'
     return response
+
+def getRosters(request):
+
+    number=request.POST['number']
+    response = ''
     
+    try:
+        rosters = Roster.objects.filter(number=number)
+        response = JsonResponse(rosters, safe=False)
+    except Exception:
+        response = JsonResponse("error", safe=False)
+
+    response["Access-Control-Allow-Origin"] = '*'
+    return response
