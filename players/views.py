@@ -1,6 +1,7 @@
 import os
 import json
 from django.shortcuts import render
+from django.core import serializers
 from django.http import JsonResponse
 from .models import Player, Roster, Owner
 from twilio.rest import Client
@@ -90,8 +91,10 @@ def getRosters(request):
     response = ''
     
     try:
-        rosters = Roster.objects.filter(number=number)
-        response = JsonResponse(rosters, safe=False)
+        owner = Owner.objects.get(number=number)
+        rosters = Roster.objects.filter(owner=owner)
+        data = serializers.serialize('json', rosters, fields=("name", "players"))
+        response = JsonResponse(data, safe=False)
     except Exception:
         response = JsonResponse("error", safe=False)
 
