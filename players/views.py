@@ -94,7 +94,7 @@ def getRosters(request):
     try:
         owner = Owner.objects.get(number=number)
         rosters = Roster.objects.filter(owner=owner)
-        data = serializers.serialize('json', rosters, fields=("name", "players"))
+        data = serializers.serialize('json', rosters, fields=("name", "players", "parameters"))
         response = JsonResponse(data, safe=False)
     except Exception:
         response = JsonResponse("error", safe=False)
