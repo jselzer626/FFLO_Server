@@ -14,7 +14,7 @@ origin_number = '+12057829884'
 # Create your views here.
 def loadInitial(request):
     fullPlayerSet = [
-        {'id': player.playerId, 'displayName': player.displayName, 'team': player.team, 'position': player.position,
+        {'id': player.playerId, 'systemId': player.id, 'displayName': player.displayName, 'team': player.team, 'position': player.position,
         'profileImg': player.profileImg, 'standardRanking': player.standardRanking, "pprRanking": player.pprRanking}
         for player in Player.objects.all()]
     
@@ -96,7 +96,6 @@ def getRosters(request):
         rosters = Roster.objects.filter(owner=owner)
         data = serializers.serialize('json', rosters, fields=("name", "players"))
         response = JsonResponse(data, safe=False)
-        print(data)
     except Exception:
         response = JsonResponse("error", safe=False)
 
