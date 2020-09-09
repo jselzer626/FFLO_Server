@@ -5,6 +5,7 @@ from django.conf import settings
 class Owner(models.Model):
     number=models.CharField(max_length=10)
     verify=models.CharField(max_length=7)
+    verified=models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.number}"

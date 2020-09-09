@@ -27,11 +27,25 @@ def loadInitial(request):
 def generateCode(request):
 
     destinationNumber = request.POST['number']
-    # check if number has already been verified
+    roster = request.POST['roster']
+    parameters = request.POST['parameters']
     responseText = ''
+
+    # check if number has already been verified
     try:
-        Owner.objects.get(number=destinationNumber)
-        responseText="verified"
+        owner = Owner.objects.get(number=destinationNumber)
+        if owner and owner.verified:
+            playersToAdd = json.loads(roster)
+            if Roster.objects.filter(name=playersToAdd['name'],owner=owner):
+                raise Exception
+            newRoster = Roster(owner=owner, name=playersToAdd['name'], parameters=parameters)
+            newRoster.save()
+            for player in playersToAdd['Total']:
+                playerDB = Player.objects.get(playerId = player['id'])
+                newRoster.players.add(playerDB)
+            responseText="verified"
+        else:
+            responseText="send success"
     except Exception:
         # this is a token sent to the user to configure message receipt
         code = randint(100000, 999999)
@@ -54,30 +68,17 @@ def generateCode(request):
 
 def verifyCode(request):
 
-    code = request.POST['code']
     number = request.POST['number']
-    roster = request.POST['roster']
-    parameters = request.POST['parameters']
+    code = request.POST['code']
     responseText = ''
     try:
         owner = Owner.objects.get(number=number)
         if owner == Owner.objects.get(verify=code):
-            print('yes1')
-            playersToAdd = json.loads(roster)
-            print(playersToAdd['name'])
-            if Roster.objects.filter(name=playersToAdd['name'],owner=owner):
-                print('yes2')
-                raise Exception
-            newRoster = Roster(owner=owner, name=playersToAdd['name'], parameters=parameters)
-            newRoster.save()
-            for player in playersToAdd['Total']:
-                playerDB = Player.objects.get(playerId = player['id'])
-                print(playerDB)
-                newRoster.players.add(playerDB)
-
+            ownerToUpdate = Owner.objects.get(verify=code)
+            ownerToUpdate.verified = True
+            ownerToUpdate.save()
             responseText='verified'
 
-            
     except Exception:
         responseText = "error"
     
@@ -95,6 +96,7 @@ def getRosters(request):
         rosters = Roster.objects.filter(owner=owner)
         data = serializers.serialize('json', rosters, fields=("name", "players"))
         response = JsonResponse(data, safe=False)
+        print(data)
     except Exception:
         response = JsonResponse("error", safe=False)
 
