@@ -33,34 +33,36 @@ def generateCode(request):
 
     # check if number has already been verified
     try:
-        owner = Owner.objects.get(number=destinationNumber)
-        if owner and owner.verified:
-            playersToAdd = json.loads(roster)
-            if Roster.objects.filter(name=playersToAdd['name'],owner=owner):
-                raise Exception
-            newRoster = Roster(owner=owner, name=playersToAdd['name'], parameters=parameters)
-            newRoster.save()
-            for player in playersToAdd['Total']:
-                playerDB = Player.objects.get(playerId = player['id'])
-                newRoster.players.add(playerDB)
+        try:
+            owner = Owner.objects.get(number=destinationNumber)
+        except Exception:
+            code = randint(100000, 999999)
+            owner = Owner(number=destinationNumber, verify=code)
+            owner.save()
+
+        playersToAdd = json.loads(roster)
+        if Roster.objects.filter(name=playersToAdd['name'],owner=owner):
+            raise Exception
+        newRoster = Roster(owner=owner, name=playersToAdd['name'], parameters=parameters)
+        newRoster.save()
+        for player in playersToAdd['Total']:
+            playerDB = Player.objects.get(playerId = player['id'])
+            newRoster.players.add(playerDB)
+        
+        if owner.verified:
             responseText="verified"
         else:
             responseText="send success"
+            try:
+                numberVerification = client.messages.create(
+                    body=f"Your code for Lineup Reminder is {code}",
+                    from_=origin_number,
+                    to=f"+1{destinationNumber}"
+                )
+            except Exception:
+                responseText = "error"
     except Exception:
-        # this is a token sent to the user to configure message receipt
-        code = randint(100000, 999999)
-        newNumber = Owner(number=destinationNumber, verify=code)
-        newNumber.save()
-
-        responseText = "send success"
-        try:
-            numberVerification = client.messages.create(
-                body=f"Your code for Lineup Reminder is {code}",
-                from_=origin_number,
-                to=f"+1{destinationNumber}"
-            )
-        except Exception:
-            responseText = "error"
+        responseText = "error"
 
     response = JsonResponse(responseText, safe=False)
     response["Access-Control-Allow-Origin"] = '*'
