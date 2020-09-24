@@ -39,9 +39,9 @@ def optimizeRoster(roster):
         else:
             addedPlayers['Bench'].append(player)
 
-    finalMessage = "Based on this week's Fantasy Football Nerd rankings, here's your recommended lineup\n"
+    finalMessage = "Based on this week's Fantasy Football Nerd rankings, here's your recommended lineup:\n"
     for position in positions:
-        finalMessage += f"{position}\n"
+        finalMessage += f"{position}:\n"
         for player in addedPlayers[position]:
             finalMessage += f"\t{player['name']}\n"
     finalMessage += "\nUpdate players here: https://jselzer626.github.io/FFLO_Client/"
@@ -127,6 +127,17 @@ def verifyCode(request):
             ownerToUpdate.verified = True
             ownerToUpdate.save()
             responseText='verified'
+            try:
+                newRoster = Roster.objects.filter(owner=ownerToUpdate).first()
+                messageText =f"Thanks for adding your roster, {newRoster.name}\n"
+                messageText += optimizeRoster(newRoster)
+                rosterSend = client.messages.create(
+                        body=messageText,
+                        from_=origin_number,
+                        to=f"+1{number}"
+                    )
+            except Exception:
+                responseText = "error"
 
     except Exception:
         responseText = "error"
