@@ -10,6 +10,43 @@ from random import randint
 
 client = Client(os.environ.get("ACCOUNT_SID"), os.environ.get("AUTH_TOKEN"))
 origin_number = '+12057829884'
+positions = ['QB', 'RB', 'WR', 'TE', 'K', 'DEF', 'Bench']
+FLEX = ['WR', 'TE', 'RB']
+
+#parameter is a roster object
+#return will be string to send via SMS
+def optimizeRoster(roster):
+    rosterParameters = eval(roster.parameters)
+
+    rankingToCheck = ""
+    if rosterParameters['type'] == 'Standard':
+        rankingToCheck = 'standardRanking'
+    else:
+        rankingToCheck = 'pprRanking'
+
+    addedPlayers = {"RB": [], "QB": [], "WR": [], "TE": [], "FLEX": [], "K": [], "DEF": [], "Total": [], "Bench": []}
+    
+    playersUnsorted = [{"name": player.displayName, "position": player.position, "pprRanking": player.pprRanking, "standardRanking": player.standardRanking}
+        for player in roster.players.all()]
+    sortedPlayers = sorted(playersUnsorted, key = lambda player: player[rankingToCheck])
+    
+    for player in sortedPlayers:
+        position = player['position']
+        if len(addedPlayers[position]) < rosterParameters[position]:
+            addedPlayers[position].append(player)
+        elif len(addedPlayers['FLEX']) < rosterParameters['FLEX'] and position in FLEX:
+            addedPlayers['FLEX'].append(player)
+        else:
+            addedPlayers['Bench'].append(player)
+
+    finalMessage = "Based on this week's Fantasy Football Nerd rankings, here's your recommended lineup\n"
+    for position in positions:
+        finalMessage += f"{position}\n"
+        for player in addedPlayers[position]:
+            finalMessage += f"\t{player['name']}\n"
+    finalMessage += "\nUpdate players here: https://jselzer626.github.io/FFLO_Client/"
+    
+    return finalMessage
 
 # Create your views here.
 def loadInitial(request):
@@ -51,6 +88,16 @@ def generateCode(request):
         
         if owner.verified:
             responseText="verified"
+            messageText =f"Thanks for adding your roster, {newRoster.name}\n"
+            messageText += optimizeRoster(newRoster)
+            try:
+                rosterSend = client.messages.create(
+                    body=messageText,
+                    from_=origin_number,
+                    to=f"+1{destinationNumber}"
+                )
+            except Exception:
+                responseText = "error"
         else:
             responseText="send success"
             try:
