@@ -79,6 +79,7 @@ def generateCode(request):
 
         playersToAdd = json.loads(roster)
         if Roster.objects.filter(name=playersToAdd['name'],owner=owner):
+            responseText = "duplicate name"
             raise Exception
         newRoster = Roster(owner=owner, name=playersToAdd['name'], parameters=parameters)
         newRoster.save()
@@ -109,8 +110,10 @@ def generateCode(request):
             except Exception:
                 responseText = "error"
     except Exception:
-        responseText = "error"
+        if responseText == "":
+            responseText = "error"
 
+    print(responseText)
     response = JsonResponse(responseText, safe=False)
     response["Access-Control-Allow-Origin"] = '*'
     return response
