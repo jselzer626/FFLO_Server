@@ -97,7 +97,9 @@ def generateCode(request):
                     from_=origin_number,
                     to=f"+1{destinationNumber}"
                 )
+                print(rosterSend)
             except Exception:
+                print(responseText)
                 responseText = "error"
         else:
             responseText="send success"
@@ -113,7 +115,6 @@ def generateCode(request):
         if responseText == "":
             responseText = "error"
 
-    print(responseText)
     response = JsonResponse(responseText, safe=False)
     response["Access-Control-Allow-Origin"] = '*'
     return response
